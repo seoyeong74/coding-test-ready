@@ -4,6 +4,8 @@
 
 using namespace std;
 
+int N, K;
+
 class Chess {
 public:
     int x;
@@ -11,6 +13,7 @@ public:
 
     int toMove;
     bool isFirst = true;
+    bool isOutRange = false;
 
     Chess(int i_x,int i_y, int i_move) {
         x = i_x;
@@ -22,16 +25,95 @@ public:
 class ChessBoard {
 public:
     int color = -1;
-    list<Chess*> chessList = {};
+    list<Chess*> chessList;
 };
 
+ChessBoard chessboard[9][9];
+list<Chess> chessList;
+
+bool doWhiteBoard(
+    list<Chess*> fromChessList,
+    list<Chess*> toChessList
+) {
+    for (auto const &i: fromChessList){
+        toChessList.push_back(i);
+    }
+    fromChessList.clear();
+
+    return toChessList.size() > 4;
+}
+
+bool doRedBoard(
+    list<Chess*> fromChessList,
+    list<Chess*> toChessList
+) {
+    fromChessList.reverse();
+    for (auto const &i: fromChessList){
+        toChessList.push_back(i);
+    }
+    fromChessList.clear();
+
+    return toChessList.size() > 4;
+}
+
+bool checkOutRange(
+    int x, int y
+) {
+    return (x < 0 || x >= N || y < 0 || y >= N);
+}
+
+bool doBlueBoard(
+    Chess currentChess
+) {
+    int changedDirection = (currentChess.toMove + 2) % 4;
+
+    int from_x = currentChess.x, from_y = currentChess.y;
+    int to_x, to_y;
+
+    switch (changedDirection){
+    case 0:
+        to_x = from_x + 1;
+        break;
+    case 1:
+        to_x = from_x - 1;
+        break;
+    case 2:
+        to_y = from_y - 1;
+        break;
+    case 3:
+        to_y = from_y - 1;
+        break;
+    default:
+        break;
+    }
+
+    ChessBoard fromChessBoardInfo = chessboard[from_x][from_y];
+    if (checkOutRange(to_x, to_y)) {
+        for (auto const &i: fromChessBoardInfo.chessList)
+            i->isOutRange = true;
+        
+        return false;
+    }
+
+    ChessBoard toChessBoardInfo = chessboard[to_x][to_y];
+    switch (toChessBoardInfo.color){
+    case 0:
+        doWhiteBoard(fromChessBoardInfo.chessList, toChessBoardInfo.chessList);
+        break;
+    case 1:
+        doRedBoard(fromChessBoardInfo.chessList, toChessBoardInfo.chessList);
+        break;
+    case 2:
+        break;
+    default:
+        break;
+    }
+    
+    return toChessBoardInfo.chessList.size() > 4;
+}
+
 int main() {
-
-    int N, K;
     cin >> N >> K;
-
-    ChessBoard chessboard[N][N];
-    list<Chess> chessList = {};
 
     for (int i = 0; i < N; i++){
         for (int j = 0; j < N; j++){
@@ -46,7 +128,7 @@ int main() {
         int i_x, i_y, i_move;
         cin >> i_x >> i_y >> i_move;
 
-        Chess newChess = Chess(i_x, i_y, i_move);
+        Chess newChess = Chess(i_x, i_y, i_move - 1);
 
         chessList.push_back(newChess);
         list<Chess*> chessListInBoard = chessboard[newChess.x][newChess.y].chessList;
@@ -61,9 +143,12 @@ int main() {
     int count = 0;
 
     while (count > 1000) {
+        bool isOverFour = false;
         for(list<Chess>::iterator iter = chessList.begin(); iter != chessList.end(); iter++){
             Chess currentChess = *iter;
 
+            if(currentChess.isOutRange)
+                continue;
             if (!currentChess.isFirst)
                 continue;
 
@@ -71,31 +156,58 @@ int main() {
             int to_x, to_y;
 
             switch (currentChess.toMove){
-            case 1:
+            case 0:
                 to_x = from_x + 1;
                 break;
-            case 2:
+            case 1:
                 to_x = from_x - 1;
                 break;
-            case 3:
+            case 2:
                 to_y = from_y - 1;
                 break;
-            case 4:
+            case 3:
                 to_y = from_y - 1;
                 break;
             default:
                 break;
             }
+            ChessBoard fromChessBoardInfo = chessboard[from_x][from_y];
 
-            if (to_x < 0 || to_x >= N || to_y < 0 || to_y >= N) {
-                chessList.erase(iter);
-
+            if (checkOutRange(to_x, to_y)) {
+                for (auto const &i: fromChessBoardInfo.chessList)
+                    i->isOutRange = true;
                 
                 continue;
             }
-            
+
+            ChessBoard toChessBoardInfo = chessboard[to_x][to_y];
+            switch (toChessBoardInfo.color){
+            case 0:
+                isOverFour = doWhiteBoard(fromChessBoardInfo.chessList, toChessBoardInfo.chessList);
+                break;
+            case 1:
+                isOverFour = doRedBoard(fromChessBoardInfo.chessList, toChessBoardInfo.chessList);
+                break;
+            case 2:
+                isOverFour = doBlueBoard(currentChess);
+                break;
+            default:
+                break;
+            }
         }
+
+        count++;
+
+        if (chessList.size() < 4){
+            count = -1;
+            break;
+        }
+
+        if (isOverFour)
+            break;
     }
+
+    cout << count << endl;
     
     return 0;
 }

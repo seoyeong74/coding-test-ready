@@ -1,5 +1,8 @@
 {
     "files.associations": {
-        "vector": "cpp"
+        "vector": "cpp",
+        "atomic": "cpp",
+        "bitset": "cpp",
+        "list": "cpp"
     }
 }
