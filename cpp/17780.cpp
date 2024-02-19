@@ -128,7 +128,7 @@ int main() {
         int i_x, i_y, i_move;
         cin >> i_x >> i_y >> i_move;
 
-        Chess newChess = Chess(i_x, i_y, i_move - 1);
+        Chess newChess = Chess(i_x - 1, i_y - 1, i_move - 1);
 
         chessList.push_back(newChess);
         list<Chess*> chessListInBoard = chessboard[newChess.x][newChess.y].chessList;
@@ -142,7 +142,7 @@ int main() {
     
     int count = 0;
 
-    while (count > 1000) {
+    while (count <= 1000) {
         bool isOverFour = false;
         for(list<Chess>::iterator iter = chessList.begin(); iter != chessList.end(); iter++){
             Chess currentChess = *iter;
