@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
-public class Main_10699 {
+class Main_10699 {
     public static void main(String args[]) throws Exception{
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
 
