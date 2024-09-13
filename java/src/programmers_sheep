@@ -1,0 +1,84 @@
+import java.util.*;
+
+class Main {
+    int N, answer = 0;
+    boolean[] visited;
+    int[] info;
+    Map<Integer, ArrayList<Integer>> graph = new HashMap<>();
+    
+    public static void main(String[] args) {
+        int[] Info, int[][] edges;
+
+        info = Info;
+        N = info.length;
+        
+        visited = new boolean[N];
+        
+        for(int i = 0; i < edges.length; i++){
+            int from = edges[i][0], to = edges[i][1];
+            if(graph.containsKey(from)){
+                graph.get(from).add(to);
+            }
+            else{
+                ArrayList<Integer> newEdge = new ArrayList<Integer>();
+                newEdge.add(to);
+                graph.put(from, newEdge);
+            }
+        }
+        
+        boolean[] nextVCandidate = new boolean[N];
+        
+        bfs(0, 0, 0, nextVCandidate);
+        
+        return answer;
+    }
+    
+    void bfs(int curV, int sheep, int wolf, boolean[] nextVCandidate){
+        // System.out.print(curV + " ");
+        visited[curV] = true;
+        nextVCandidate[curV] = false;
+        
+        if(info[curV] == 0)
+            sheep++;
+        else
+            wolf++;
+        
+        if (sheep <= wolf)
+            return;
+
+        for(int contectV: graph.getOrDefault(curV, new ArrayList<Integer>())){
+            if(!visited[contectV]){
+                nextVCandidate[contectV] = true;
+            }
+        }
+        
+        boolean possibleToGo = false;
+        for (int i = 0; i < N; i++){
+            if(!nextVCandidate[i])
+                continue;
+
+            if(info[i] == 0){
+                nextVCandidate[i] = false;
+                possibleToGo = true;
+                bfs(i, sheep, wolf, nextVCandidate);
+            }
+            else{
+                if(sheep <= wolf + 1){
+                    continue;
+                }
+
+                nextVCandidate[i] = false;
+                possibleToGo = true;
+                bfs(i, sheep, wolf, nextVCandidate);
+            }
+            
+            nextVCandidate[i] = true;
+        }
+        
+        if(!possibleToGo){
+            answer = Math.max(answer, sheep);
+            // if(answer == 6)
+                // System.out.print(road + " ");
+        }
+    }
+}

@@ -2,7 +2,7 @@ import java.io.InputStreamReader;
 import java.io.BufferedReader;
 import java.util.*;
 
-public class Main
+public class noNum
 {
     static int N, K, result = 0;
     static int[] useToolList = new int[101];
