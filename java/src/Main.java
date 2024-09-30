@@ -1,163 +1,186 @@
-//20058 11:25-11:40 stop 11:44- 12:34
+//17837 20:22-21:13
 import java.util.*;
-import java.io.*;
 
 public class Main {
-    static int N, Q;
-    static int L, L2 = 1;
+    static int N, K;
+    static ArrayList<Integer>[][] move_map;
     static int[][] map;
-    static int[] square = {
-        1, 2, 4, 8, 16, 32, 64
-        //0, 1, 2, 3, 4, 5, 6
-    };
-    static boolean[][] ice;
+    static Info[] hourse;
+    static boolean end = false;
 
-    static class Point{
+    static class Info{
         int x, y;
-        Point(int x, int y){
-            this.x = x;
-            this.y = y;
+        int d;
+        Info(int x, int y, int d){
+            this.x=  x;
+            this.y= y;
+            this.d = d;
         }
     }
 
     public static void main(String args[]) throws Exception{
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StringTokenizer st = new StringTokenizer(br.readLine(), " ");
-        N = Integer.parseInt(st.nextToken());
-        Q = Integer.parseInt(st.nextToken());
-        map = new int[square[N]][square[N]];
-        ice = new boolean[square[N]][square[N]];
+        Scanner sc = new Scanner(System.in);
 
-        for (int i = 0; i < square[N]; i++){
-            st = new StringTokenizer(br.readLine(), " ");
-            for(int j = 0; j< square[N]; j++){
-                map[i][j] = Integer.parseInt(st.nextToken());
-                if (map[i][j] > 0){
-                    ice[i][j] = true;
-                }
-                else{
-                    ice[i][j] = false;
-                }
+        N = sc.nextInt();
+        K = sc.nextInt();
+
+        move_map = new ArrayList[N][N];
+        map = new int[N][N];
+
+        hourse = new Info[K];
+
+        for(int i = 0 ; i< N; i++){
+            for(int j = 0; j< N; j++){
+                move_map[i][j] = new ArrayList<>();
+                map[i][j] = sc.nextInt();
             }
         }
 
-        st = new StringTokenizer(br.readLine(), " ");
-        for (int i_ = 0; i_ < Q; i_++){
-            L = Integer.parseInt(st.nextToken());
-            L2 = square[L];
-            rotation();
-            melt();
+        for(int i = 0; i < K; i++){
+            int x = sc.nextInt() - 1;
+            int y = sc.nextInt() - 1;
+            int d = sc.nextInt() - 1;
+
+            move_map[x][y].add(i);
+            hourse[i] = new Info(x, y, d);
         }
 
-        boolean[][] visited = new boolean[square[N]][square[N]];
-        int ice_sum = 0;
-        int max_ice = 0;
-        
-        for (int i = 0; i < square[N]; i++){
-            for(int j = 0; j< square[N]; j++){
-                if (visited[i][j])
-                    continue;
-                if (map[i][j] == 0){
-                    visited[i][j] = true;
-                    continue;
-                }
+        // for (int i = 0; i < N; i++){
+        //     for(int j = 0; j < N; j++){
+        //         if (move_map[i][j].size() == 0) System.out.print("0 ");
+        //         else{
+        //             for(int k: move_map[i][j]) System.out.print(k + ",");
+        //             System.out.print(" ");
+        //         }
+        //     }
+        //     System.out.println();
+        // }
 
-                visited[i][j] = true;
-                ice_sum += map[i][j];
-                int ice_num = 1;
-                Deque<Point> q= new ArrayDeque<>();
-                q.push(new Point(i, j));
+        int turn = 1;
 
-                while(!q.isEmpty()){
-                    Point cur = q.poll();
+        while(turn <= 1000){
+            // System.out.println(turn);
+            move();
+            // System.out.println();
+            // for (int i = 0; i < N; i++){
+            //     for(int j = 0; j < N; j++){
+            //         if (move_map[i][j].size() == 0) System.out.print("0 ");
+            //         else{
+            //             for(int k: move_map[i][j]) {System.out.print((k + 1) + ",");}
+            //             System.out.print(" ");
+            //         }
+            //     }
+            //     System.out.println();
+            // }
 
-                    for (int k = 0; k< arround.length; k++){
-                        int a_x = cur.x + arround[k][0];
-                        int a_y = cur.y + arround[k][1];
-            
-                        if (a_x < 0 || a_y < 0 || a_x >= square[N] || a_y >= square[N]){
-                            continue;
-                        }
-            
-                        if (visited[a_x][a_y] || map[a_x][a_y] == 0)
-                            continue;
-
-                        visited[a_x][a_y] = true;
-                        ice_sum += map[a_x][a_y];
-                        ice_num++;
-                        q.push(new Point(a_x, a_y));
-                    }
-                }
-
-                max_ice = Math.max(max_ice, ice_num);
+            if (end) {
+                System.out.println(turn);
+                return;
             }
+            turn++;
         }
 
-        System.out.println(ice_sum);
-        System.out.println(max_ice);
+        System.out.println(-1);
     }
 
-    public static void rotation(){
-        int[][] new_map = new int[square[N]][square[N]];
-
-        for (int start_x = 0; start_x < square[N]; start_x += L2){
-            for (int start_y = 0; start_y < square[N]; start_y += L2){
-                for (int i = 0; i < L2; i++){
-                    for(int j= 0; j< L2; j++){
-                        new_map[start_x + j][start_y + (L2 - 1 - i)] = map[start_x + i][start_y+j];
-                        if (new_map[start_x + j][start_y + (L2 - 1 - i)] > 0){
-                            ice[start_x + j][start_y + (L2 - 1 - i)] = true;
-                        }
-                        else{
-                            ice[start_x + j][start_y + (L2 - 1 - i)] = false;
-                        }
-                    }
-                }
-            }
-        }
-
-        map = new_map;
-    }
-
-    public static void melt(){
-        for (int i = 0; i < square[N]; i++){
-            for(int j = 0; j< square[N]; j++){
-                if (map[i][j] == 0)
-                    continue;
-
-                int ice_num = cal_ice(i, j);
-                if (ice_num >= 3)
-                    continue;
-                else
-                    map[i][j]--;
-            }
-        }
-
-    }
-
-    static int[][] arround = {
+    public static int[][] direction = {
+        {0,1},
+        {0,-1},
         {-1, 0},
-        {1, 0},
-        {0, -1},
-        {0, 1}
+        {1, 0}
     };
 
-    public static int cal_ice(int x, int y){
-        int sum = 0;
-        for (int i = 0; i< arround.length; i++){
-            int a_x = x + arround[i][0];
-            int a_y = y + arround[i][1];
+    public static void move(){
+        for(int i = 0; i < K; i++){
+            Info cur = hourse[i];
 
-            if (a_x < 0 || a_y < 0 || a_x >= square[N] || a_y >= square[N]){
-                continue;
+            int next_x = cur.x + direction[cur.d][0];
+            int next_y = cur.y + direction[cur.d][1];
+
+            if (next_x < 0 || next_y < 0 || next_x >= N || next_y >= N){
+                next_x = cur.x + direction[reflect(cur.d)][0];
+                next_y = cur.y + direction[reflect(cur.d)][1];
+                cur.d = reflect(cur.d);
             }
+            else if (map[next_x][next_y] == 2){
+                next_x = cur.x + direction[reflect(cur.d)][0];
+                next_y = cur.y + direction[reflect(cur.d)][1];
+                cur.d = reflect(cur.d);
 
-            if (ice[a_x][a_y])
-                sum++;
+                if (next_x < 0 || next_y < 0 || next_x >= N || next_y >= N) continue;
+            }
+            
+            if (map[next_x][next_y] == 0){
+                white(next_x, next_y, cur, i);
+            }
+            else if (map[next_x][next_y] == 1){
+                red(next_x, next_y, cur, i);
+            }
+            else if (map[next_x][next_y] == 2){
+            }
+        }
+    }
+
+    public static int reflect(int d){
+        if (d == 0) return 1;
+        else if (d == 1) return 0;
+        else if (d == 2) return 3;
+        else return 2;
+    }
+
+    public static void white(int to_x, int to_y, Info cur, int num){
+        // System.out.println("white! "+ to_x + " " + to_y);
+        ArrayList<Integer> list = move_map[cur.x][cur.y];
+
+        int i;
+        for (i = 0; i < list.size(); i++){
+            if (list.get(i) == num) break;
+        }
+        
+        List<Integer> to_move = list.subList(i, list.size());
+        // System.out.println(to_move.size());
+
+        int last_x = cur.x;
+        int last_y = cur.y;
+
+        //말 옮기기
+        for(int k: to_move){
+            hourse[k].x = to_x;
+            hourse[k].y = to_y;
+        }
+        move_map[to_x][to_y].addAll(to_move);
+        // System.out.println(move_map[to_x][to_y].size());
+
+        //말 제거
+        move_map[last_x][last_y].removeAll(to_move);
+
+        if (move_map[to_x][to_y].size() >= 4) end = true;
+    }
+
+    public static void red(int to_x, int to_y, Info cur, int num){
+        ArrayList<Integer> list = move_map[cur.x][cur.y];
+
+        int i;
+        for (i = 0; i < list.size(); i++){
+            if (list.get(i) == num) break;
         }
 
-        return sum;
+        int last_x = cur.x;
+        int last_y = cur.y;
+        List<Integer> to_move = list.subList(i, list.size());
 
+        //말 옮기기
+        for(int j = to_move.size() - 1; j >=0; j--){
+            int k = to_move.get(j);
+            hourse[k].x = to_x;
+            hourse[k].y = to_y;
+
+            move_map[to_x][to_y].add(k);
+        }
+
+        //말 제거
+        move_map[last_x][last_y].removeAll(to_move);
+
+        if (move_map[to_x][to_y].size() >= 4) end = true;
     }
-    
 }
