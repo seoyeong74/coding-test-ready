@@ -1,7 +1,7 @@
 //17837 20:22-21:13
 import java.util.*;
 
-public class Main {
+public class 17837 {
     static int N, K;
     static ArrayList<Integer>[][] move_map;
     static int[][] map;
